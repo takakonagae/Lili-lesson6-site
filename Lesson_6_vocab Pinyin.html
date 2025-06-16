@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>第6課 単語ピンイン練習</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f0f0f0;
+      padding: 20px;
+    }
+    #container {
+      background: white;
+      padding: 30px;
+      max-width: 800px;
+      margin: auto;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      text-align: center;
+    }
+    input, button {
+      font-size: 16px;
+      margin: 10px 0;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+    }
+    .menu-link {
+      display: block;
+      text-align: center;
+      margin-top: 30px;
+    }
+    .menu-link a {
+      display: inline-block;
+      padding: 10px 20px;
+      background: #007acc;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: background 0.3s;
+    }
+    .menu-link a:hover {
+      background: #005fa3;
+    }
+    .progress-bar {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 14px;
+    }
+    .progress-bar span {
+      display: inline-block;
+      margin: 0 4px;
+    }
+    .bar {
+      width: 100%;
+      height: 20px;
+      background-color: #eee;
+      border: 1px solid #aaa;
+      border-radius: 4px;
+      margin-top: 5px;
+      position: relative;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      background-color: #ccffcc;
+      width: 0%;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <h1>第6課 単語ピンイン練習</h1>
+    <button onclick="playAudio()">▶ 単語を聞く</button><br>
+    <input type="text" id="pinyinInput" placeholder="ピンインを入力" onkeydown="handleEnterKey(event);">
+    <button onclick="checkPinyin()">答え合わせ</button>
+    <div id="feedback"></div>
+    <div class="progress-bar">
+      正解数 <span style="color:#32cd32;">▇</span> 3回:<span id="count3">0</span>　
+      <span style="color:#64ee64;">▇</span> 2回:<span id="count2">0</span>　
+      <span style="color:#a0ffa0;">▇</span> 1回:<span id="count1">0</span>　
+      <span style="color:#ffffff;">▇</span> 0回:<span id="count0">0</span>
+      <div class="bar"><div id="barFill" class="bar-fill"></div></div>
+    </div>
+    <div class="menu-link">
+      <a href="lesson_6_menu_.html">メニューに戻る</a>
+    </div>
+  </div>
+
+  <audio id="audioPlayer"></audio>
+  <script>
+    const vocabList = [
+      {cn: "动物园", pinyin: ["dòngwùyuán"], file: "动物园.mp3"},
+      {cn: "金鱼", pinyin: ["jīnyú"], file: "金鱼.mp3"},
+      {cn: "可爱", pinyin: ["kě’ài", "kěài"], file: "可爱.mp3"},
+      {cn: "熊猫", pinyin: ["xióngmāo"], file: "熊猫.mp3"},
+      {cn: "多少", pinyin: ["duōshao"], file: "多少.mp3"},
+      {cn: "大约", pinyin: ["dàyuē"], file: "大约.mp3"},
+      {cn: "小宝宝", pinyin: ["xiǎobǎobao"], file: "小宝宝.mp3"},
+      {cn: "有的", pinyin: ["yǒude"], file: "有的.mp3"},
+    ];
+
+    let currentIndex = 0;
+    const stats = {};
+
+    function playAudio() {
+      const audio = document.getElementById("audioPlayer");
+      audio.src = vocabList[currentIndex].file;
+      audio.play();
+      document.getElementById("feedback").innerHTML = '';
+      document.getElementById("pinyinInput").value = '';
+    }
+
+    function checkPinyin() {
+      const input = document.getElementById("pinyinInput").value.trim().toLowerCase();
+      const current = vocabList[currentIndex];
+      const key = current.cn;
+      const pinyinList = current.pinyin;
+      if (!stats[key]) stats[key] = 0;
+
+      if (pinyinList.includes(input)) {
+        stats[key] = Math.min(3, stats[key] + 1);
+        document.getElementById("feedback").innerHTML = '<span style="color:green;">正解です！</span>';
+      } else {
+        stats[key] = 0;
+        document.getElementById("feedback").innerHTML = '<span style="color:red;">違います。正しくは: ' + pinyinList.join(' / ') + '</span>';
+      }
+
+      updateProgress();
+      currentIndex = (currentIndex + 1) % vocabList.length;
+    }
+
+    function updateProgress() {
+      const counts = [0, 0, 0, 0];
+      for (let word of vocabList) {
+        counts[stats[word.cn] || 0]++;
+      }
+      document.getElementById("count0").innerText = counts[0];
+      document.getElementById("count1").innerText = counts[1];
+      document.getElementById("count2").innerText = counts[2];
+      document.getElementById("count3").innerText = counts[3];
+
+      const total = counts.reduce((a, b) => a + b, 0);
+      const weighted = (counts[1] + 2 * counts[2] + 3 * counts[3]) / (3 * total);
+      document.getElementById("barFill").style.width = (weighted * 100) + "%";
+    }
+  
+    let waitingForNext = false;
+    function handleEnterKey(event) {
+      if (event.key === 'Enter') {
+        if (waitingForNext) {
+          playAudio();
+          waitingForNext = false;
+        } else {
+          checkPinyin();
+          waitingForNext = true;
+        }
+      }
+    }
+    
+    window.onload = function() {
+      playAudio();
+      waitingForNext = false;
+    };
+
+</script>
+</body>
+</html>

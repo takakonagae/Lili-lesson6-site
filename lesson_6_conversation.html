@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>第6課 会話文練習</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background: #fff;
+      padding: 20px;
+    }
+    h1 {
+      font-size: 28px;
+      margin-bottom: 20px;
+    }
+    button {
+      font-size: 18px;
+      padding: 10px 20px;
+      margin: 10px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    #playBtn { background-color: #4CAF50; color: white; }
+    #checkBtn { background-color: #008CBA; color: white; }
+    input {
+      font-size: 18px;
+      padding: 10px;
+      width: 60%;
+    }
+    #feedback {
+      font-size: 18px;
+      margin-top: 10px;
+      height: 24px;
+    }
+    .progress-counts {
+      margin-top: 20px;
+      font-size: 16px;
+    }
+    .bar {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      margin-right: 5px;
+      vertical-align: middle;
+    }
+    .bar-2 { background-color: #2e7d32; }
+    .bar-1 { background-color: #81c784; }
+    .progress-bar {
+      height: 20px;
+      background: #eee;
+      width: 80%;
+      margin: 20px auto;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background-color: #4CAF50;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+  <h1>第6課 会話練習</h1>
+  <button id="playBtn">▶ 会話を聞く</button>
+  <input type="text" id="answerInput" placeholder="聞こえた文を入力">
+  <br>
+  <button id="checkBtn">答え合わせ</button>
+  <div id="feedback"></div>
+  <div class="progress-counts" id="progressCounts"></div>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  <audio id="audio"></audio>
+
+  <script>
+    const items = [
+      { text: "这个动物园里有几只熊猫？", file: "q1.mp3" },
+      { text: "这只叫力力。那只叫真真。", file: "q2.mp3" },
+      { text: "还有两只小宝宝。", file: "q3.mp3" },
+      { text: "日本的动物园里一共有多少熊猫？", file: "q4.mp3" },
+      { text: "大约有十几只吧。", file: "q5.mp3" },
+      { text: "真多啊！", file: "q6.mp3" },
+      { text: "中国的动物园里都有熊猫吗？", file: "q7.mp3" },
+      { text: "不。有的动物园里有熊猫，有的没有。", file: "q8.mp3" }
+    ];
+
+    let score = Array(items.length).fill(0);
+    let currentIndex = -1;
+    let justCorrect = false;
+    let unusedPool = [];
+
+    const audio = document.getElementById("audio");
+    const playBtn = document.getElementById("playBtn");
+    const checkBtn = document.getElementById("checkBtn");
+    const feedback = document.getElementById("feedback");
+    const answerInput = document.getElementById("answerInput");
+    const progressCounts = document.getElementById("progressCounts");
+
+    function playAudio(index) {
+      if (index >= 0 && index < items.length) {
+        audio.src = items[index].file;
+        audio.play();
+      }
+    }
+
+    function updateProgress() {
+      let count2 = 0, count1 = 0, count0 = 0;
+      score.forEach(s => {
+        if (s >= 2) count2++;
+        else if (s === 1) count1++;
+        else count0++;
+      });
+
+      progressCounts.innerHTML = `
+        正解数　
+        <span class="bar bar-2"></span>2回: ${count2}　
+        <span class="bar bar-1"></span>1回: ${count1}　
+        0回: ${count0}
+      `;
+
+      const total = items.length * 2;
+      const achieved = score.reduce((sum, s) => sum + Math.min(s, 2), 0);
+      document.getElementById("progressFill").style.width = `${(achieved / total) * 100}%`;
+    }
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    function nextQuestion() {
+      if (unusedPool.length === 0) {
+        unusedPool = items.map((_, i) => i).filter(i => score[i] < 2);
+        shuffle(unusedPool);
+      }
+
+      if (unusedPool.length === 0) {
+        feedback.innerText = "すべての文を2回正解しました。";
+        currentIndex = -1;
+        return;
+      }
+
+      currentIndex = unusedPool.pop();
+      playAudio(currentIndex);
+    }
+
+    function checkAnswer() {
+      if (currentIndex === -1) return;
+      const expected = items[currentIndex].text.replace(/[。，！？？\s]/g, "");
+      const input = answerInput.value.replace(/[。，！？？\s]/g, "");
+
+      if (!input) return;
+
+      if (input === expected) {
+        if (score[currentIndex] < 2) score[currentIndex]++;
+        feedback.innerHTML = `<span style="color:green;">正解です！</span>`;
+        updateProgress();
+        answerInput.value = "";
+        justCorrect = true;
+      } else {
+        feedback.innerHTML = `<span style="color:red;">違います。もう一度聞いてみましょう。</span>`;
+        setTimeout(() => playAudio(currentIndex), 1000);
+        justCorrect = false;
+      }
+    }
+
+    checkBtn.onclick = checkAnswer;
+
+    playBtn.onclick = () => {
+      if (justCorrect) {
+        justCorrect = false;
+        nextQuestion();
+      } else if (currentIndex === -1) {
+        nextQuestion();
+      } else {
+        playAudio(currentIndex);
+      }
+    };
+
+    answerInput.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        if (justCorrect) {
+          justCorrect = false;
+          nextQuestion();
+        } else {
+          checkAnswer();
+        }
+      }
+    });
+
+    updateProgress();
+    nextQuestion();
+  </script>
+</body>
+</html>
