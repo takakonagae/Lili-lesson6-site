@@ -76,7 +76,7 @@
   <div id="container">
     <h1>第6課 単語練習</h1>
     <button onclick="playVocab()">▶ 単語を聞く</button><br>
-    <input type="text" id="answerVocab" placeholder="聞き取った単語を入力（Enterで答え合わせ）">
+    <input type="text" id="answerVocab" placeholder="聞き取った単語を入力（Enterで答え合わせ）" onkeydown="handleKeyDown(event)">
     <button onclick="checkVocab()">答え合わせ</button>
     <div id="feedbackVocab"></div>
     <div id="completionMessage"></div>
@@ -201,6 +201,20 @@
       if (event.key === 'Enter' || event.keyCode === 13) {
         event.preventDefault(); // フォームの送信を防ぐ
         checkVocab();
+      }
+    }
+
+    function handleKeyDown(event) {
+      if (event.key === 'Enter' || event.keyCode === 13) {
+        event.preventDefault();
+        
+        if (isCorrect) {
+          // 正解後のEnterキーは次の単語を再生
+          playVocab();
+        } else {
+          // 通常のEnterキーは答え合わせ
+          checkVocab();
+        }
       }
     }
 
