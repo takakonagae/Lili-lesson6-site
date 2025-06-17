@@ -76,7 +76,7 @@
   <div id="container">
     <h1>第6課 単語練習</h1>
     <button onclick="playVocab()">▶ 単語を聞く</button><br>
-    <input type="text" id="answerVocab" placeholder="聞き取った単語を入力">
+    <input type="text" id="answerVocab" placeholder="聞き取った単語を入力（Enterで答え合わせ）" onkeypress="handleKeyPress(event)">
     <button onclick="checkVocab()">答え合わせ</button>
     <div id="feedbackVocab"></div>
     <div id="completionMessage"></div>
@@ -188,6 +188,13 @@
         feedback.innerHTML = '<span style="color:red;">違います。もう一度試しましょう。</span>';
       }
       updateProgress();
+    }
+
+    function handleKeyPress(event) {
+      if (event.key === 'Enter' || event.keyCode === 13) {
+        event.preventDefault(); // フォームの送信を防ぐ
+        checkVocab();
+      }
     }
 
     resetVocabList();
