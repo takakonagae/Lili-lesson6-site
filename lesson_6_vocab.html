@@ -70,14 +70,14 @@
       width: 0%;
       transition: width 0.5s;
     }
-    .bar-fill.count1 {
-      background-color: #a0ffa0;
+    .count1 {
+      background-color: #a0ffa0 !important;
     }
-    .bar-fill.count2 {
-      background-color: #64ee64;
+    .count2 {
+      background-color: #64ee64 !important;
     }
-    .bar-fill.count3 {
-      background-color: #32cd32;
+    .count3 {
+      background-color: #32cd32 !important;
     }
   </style>
 </head>
@@ -97,7 +97,7 @@
       <div class="bar"><div id="barFill" class="bar-fill"></div></div>
     </div>
     <div class="menu-link">
-      <a href="index.html" style="margin-left: 10px;">メニューに戻る</a>
+      <a href="index.html">メニューに戻る</a>
     </div>
   </div>
 
@@ -138,6 +138,7 @@
         const count = stats[word.cn] || 0;
         counts[count]++;
       }
+
       document.getElementById('count1').innerText = counts[1];
       document.getElementById('count2').innerText = counts[2];
       document.getElementById('count3').innerText = counts[3];
@@ -149,8 +150,10 @@
       const barFill = document.getElementById('barFill');
       barFill.style.width = width + '%';
 
-      // 色を一度クリアしてから適切なクラスを追加
-      barFill.className = 'bar-fill';
+      // すべての色クラスを一度削除
+      barFill.classList.remove('count1', 'count2', 'count3');
+
+      // 最も多く含まれるランクに応じて色を追加
       if (counts[3] > 0) {
         barFill.classList.add('count3');
       } else if (counts[2] > 0) {
@@ -188,7 +191,6 @@
     function checkVocab() {
       const input = document.getElementById('answerVocab').value.trim();
       const feedback = document.getElementById('feedbackVocab');
-      const completion = document.getElementById('completionMessage');
       const currentVocab = vocabList[vocabIndex].cn;
       if (!stats[currentVocab]) stats[currentVocab] = 0;
 
