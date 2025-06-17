@@ -184,6 +184,8 @@
             isCorrect = false; // 完了時はリセット
           } else {
             resetVocabList();
+            // 新しい周が始まったら自動的に次の単語を再生
+            setTimeout(playVocab, 100);
           }
         }
       } else {
@@ -207,13 +209,14 @@
       answerInput.addEventListener('keypress', function(event) {
         if (event.key === 'Enter' || event.keyCode === 13) {
           event.preventDefault();
-          if (isCorrect) {
-            // 正解後のEnterキーは次の単語を再生
+          if (isCorrect && vocabIndex < vocabList.length) {
+            // 正解後かつまだ問題が残っている場合は次の単語を再生
             playVocab();
-          } else {
-            // 通常のEnterキーは答え合わせ
+          } else if (!isCorrect) {
+            // 不正解状態または初回の場合は答え合わせ
             checkVocab();
           }
+          // 練習完了状態の場合は何もしない
         }
       });
     });
