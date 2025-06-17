@@ -108,7 +108,7 @@
     let vocabList = [];
     let vocabIndex = 0;
     let totalRounds = 0;
-    let stats = {};
+    let isCorrect = false; // 正解状態を追跡する変数
 
     function shuffle(array) {
       for (let i = array.length - 1; i > 0; i--) {
@@ -162,6 +162,7 @@
       }
       document.getElementById('answerVocab').value = '';
       document.getElementById('feedbackVocab').innerHTML = '';
+      isCorrect = false; // 新しい問題開始時にリセット
     }
 
     function checkVocab() {
@@ -173,12 +174,14 @@
 
       if (input === currentVocab) {
         stats[currentVocab] = Math.min(3, stats[currentVocab] + 1);
-        feedback.innerHTML = '<span style="color:green;">正解です！</span>';
+        feedback.innerHTML = '<span style="color:green;">正解です！（Enterで次の単語を聞く）</span>';
+        isCorrect = true; // 正解状態を設定
         vocabIndex++;
         if (vocabIndex >= vocabList.length) {
           totalRounds++;
           if (totalRounds >= 3) {
             completion.innerHTML = '<strong>🎉 3周正解しました！練習完了です！</strong>';
+            isCorrect = false; // 完了時はリセット
           } else {
             resetVocabList();
           }
@@ -186,6 +189,7 @@
       } else {
         stats[currentVocab] = 0;
         feedback.innerHTML = '<span style="color:red;">違います。もう一度試しましょう。</span>';
+        isCorrect = false; // 不正解状態を設定
       }
       updateProgress();
     }
@@ -203,7 +207,13 @@
       answerInput.addEventListener('keypress', function(event) {
         if (event.key === 'Enter' || event.keyCode === 13) {
           event.preventDefault();
-          checkVocab();
+          if (isCorrect) {
+            // 正解後のEnterキーは次の単語を再生
+            playVocab();
+          } else {
+            // 通常のEnterキーは答え合わせ
+            checkVocab();
+          }
         }
       });
     });
