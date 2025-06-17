@@ -126,7 +126,8 @@
     function updateProgress() {
       const counts = [0, 0, 0, 0];
       for (let word of vocabListBase) {
-        counts[stats[word.cn] || 0]++;
+        const count = stats[word.cn] || 0;
+        counts[count]++;
       }
       document.getElementById('count0').innerText = counts[0];
       document.getElementById('count1').innerText = counts[1];
@@ -212,9 +213,7 @@
           
           if (isCorrect) {
             // 正解後のEnterキーは次の単語を再生
-            if (vocabIndex < vocabList.length) {
-              playVocab();
-            }
+            playVocab();
           } else {
             // 通常のEnterキーは答え合わせ
             checkVocab();
