@@ -107,8 +107,8 @@
     let vocabList = [];
     let vocabIndex = 0;
     let totalRounds = 0;
-    let stats = {};
     let isCorrect = false;
+    let stats = {};
 
     function shuffle(array) {
       for (let i = array.length - 1; i > 0; i--) {
@@ -134,10 +134,9 @@
       document.getElementById('count3').innerText = counts[3];
       document.getElementById('countReview').innerText = 0;
 
-      let total = counts.reduce((a,b) => a + b, 0);
-      let bar = document.getElementById('barFill');
-      let width = (counts[1] + 2 * counts[2] + 3 * counts[3]) / (3 * total) * 100;
-      bar.style.width = width + '%';
+      let total = counts.reduce((a, b) => a + b, 0);
+      let width = total > 0 ? (counts[1] + 2 * counts[2] + 3 * counts[3]) / (3 * total) * 100 : 0;
+      document.getElementById('barFill').style.width = width + '%';
     }
 
     function playVocab() {
@@ -176,17 +175,6 @@
         stats[currentVocab] = Math.min(3, stats[currentVocab] + 1);
         feedback.innerHTML = '<span style="color:green;">正解です！（Enterで次の単語を聞く）</span>';
         isCorrect = true;
-        vocabIndex++;
-        if (vocabIndex >= vocabList.length) {
-          totalRounds++;
-          if (totalRounds >= 3) {
-            completion.innerHTML = '<strong>🎉 3周正解しました！練習完了です！</strong>';
-            isCorrect = false;
-          } else {
-            resetVocabList();
-            setTimeout(playVocab, 100);
-          }
-        }
       } else {
         stats[currentVocab] = 0;
         feedback.innerHTML = '<span style="color:red;">違います。もう一度試しましょう。</span>';
@@ -195,28 +183,36 @@
       updateProgress();
     }
 
-    // Enterキーのイベントハンドラー
-    function handleEnterKey(event) {
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        if (isCorrect) {
-          playVocab();
-        } else {
-          checkVocab();
-        }
+    window.onload = function () {
+      const answerInput = document.getElementById('answerVocab');
+      if (answerInput) {
+        answerInput.onkeydown = function (event) {
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            if (isCorrect) {
+              vocabIndex++;
+              if (vocabIndex >= vocabList.length) {
+                totalRounds++;
+                if (totalRounds >= 3) {
+                  document.getElementById('completionMessage').innerHTML =
+                    '<strong>🎉 3周正解しました！練習完了です！</strong>';
+                } else {
+                  resetVocabList();
+                }
+                vocabIndex = 0;
+              }
+              isCorrect = false;
+              playVocab();
+            } else {
+              checkVocab();
+            }
+          }
+        };
       }
-    }
 
-    resetVocabList();
-    updateProgress();
-
-    // ページ読み込み完了後にイベントリスナーを設定
-    setTimeout(function() {
-      const input = document.getElementById('answerVocab');
-      if (input) {
-        input.addEventListener('keydown', handleEnterKey);
-      }
-    }, 100);
+      resetVocabList();
+      updateProgress();
+    };
 </script>
 </body>
 </html>
