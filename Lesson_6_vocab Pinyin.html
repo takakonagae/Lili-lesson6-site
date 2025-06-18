@@ -102,7 +102,7 @@
     const vocabList = [
       {cn: "动物园", pinyin: ["dòngwùyuán"], file: "动物园.mp3"},
       {cn: "金鱼", pinyin: ["jīnyú"], file: "金鱼.mp3"},
-      {cn: "可爱", pinyin: ["kě’ài", "kěài"], file: "可爱.mp3"},
+      {cn: "可爱", pinyin: ["kě'ài", "kěài"], file: "可爱.mp3"},
       {cn: "熊猫", pinyin: ["xióngmāo"], file: "熊猫.mp3"},
       {cn: "多少", pinyin: ["duōshao"], file: "多少.mp3"},
       {cn: "大约", pinyin: ["dàyuē"], file: "大约.mp3"},
@@ -114,7 +114,6 @@
     let currentIndex = 0;
     const stats = {};
     let waitingForNext = false;
-    let roundCount = 0;
 
     function shuffle(array) {
       for (let i = array.length - 1; i > 0; i--) {
@@ -155,10 +154,11 @@
 
       currentIndex++;
       if (currentIndex >= quizList.length) {
-        roundCount++;
-        if (roundCount >= 3) {
+        // 全ての単語が3回正解しているかチェック
+        const allComplete = vocabList.every(word => (stats[word.cn] || 0) >= 3);
+        if (allComplete) {
           document.getElementById("completionMessage").innerHTML =
-            '<strong>🎉 3周正解しました！練習完了です！</strong>';
+            '<strong>🎉 全ての単語を3回正解しました！練習完了です！</strong>';
         }
         resetQuizList();
       }
