@@ -111,6 +111,7 @@
     ];
 
     let currentIndex = 0;
+    let roundCount = 0;
     const stats = {};
     let waitingForNext = false;
 
@@ -138,12 +139,16 @@
       }
 
       updateProgress();
-      currentIndex = (currentIndex + 1) % vocabList.length;
 
-      // 全て3回正解ならメッセージ表示
-      const allCorrect = vocabList.every(item => stats[item.cn] >= 3);
-      if (allCorrect) {
-        document.getElementById("completionMessage").innerHTML = '<strong>🎉 3周正解しました！練習完了です！</strong>';
+      currentIndex++;
+      if (currentIndex >= vocabList.length) {
+        roundCount++;
+        currentIndex = 0;
+
+        if (roundCount >= 3) {
+          document.getElementById("completionMessage").innerHTML =
+            '<strong>🎉 3周正解しました！練習完了です！</strong>';
+        }
       }
     }
 
