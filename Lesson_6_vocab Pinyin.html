@@ -67,9 +67,13 @@
     }
     .bar-fill {
       height: 100%;
-      background-color: #ccffcc;
       width: 0%;
+      transition: width 0.5s;
     }
+    .count1 { background-color: #a0ffa0 !important; }
+    .count2 { background-color: #64ee64 !important; }
+    .count3 { background-color: #32cd32 !important; }
+    .count-review { background-color: #ffff00 !important; }
   </style>
 </head>
 <body>
@@ -79,12 +83,13 @@
     <input type="text" id="pinyinInput" placeholder="ピンインを入力" onkeydown="handleEnterKey(event);">
     <button onclick="checkPinyin()">答え合わせ</button>
     <div id="feedback"></div>
+    <div id="completionMessage"></div>
     <div class="progress-bar">
       正解数 
       <span style="color:#32cd32;">▇</span> 3回:<span id="count3">0</span>　
       <span style="color:#64ee64;">▇</span> 2回:<span id="count2">0</span>　
       <span style="color:#a0ffa0;">▇</span> 1回:<span id="count1">0</span>　
-      <span style="color:#ffffff;">▇</span> 0回:<span id="count0">0</span>
+      <span style="color:#ffff00;">▇</span> 復習:<span id="countReview">0</span>
       <div class="bar"><div id="barFill" class="bar-fill"></div></div>
     </div>
     <div class="menu-link">
@@ -126,7 +131,7 @@
 
       if (pinyinList.includes(input)) {
         stats[key] = Math.min(3, stats[key] + 1);
-        document.getElementById("feedback").innerHTML = '<span style="color:green;">正解です！</span>';
+        document.getElementById("feedback").innerHTML = '<span style="color:green;">正解です！（Enterで次へ）</span>';
       } else {
         stats[key] = 0;
         document.getElementById("feedback").innerHTML = '<span style="color:red;">違います。正しくは: ' + pinyinList.join(' / ') + '</span>';
@@ -134,6 +139,12 @@
 
       updateProgress();
       currentIndex = (currentIndex + 1) % vocabList.length;
+
+      // 全て3回正解ならメッセージ表示
+      const allCorrect = vocabList.every(item => stats[item.cn] >= 3);
+      if (allCorrect) {
+        document.getElementById("completionMessage").innerHTML = '<strong>🎉 3周正解しました！練習完了です！</strong>';
+      }
     }
 
     function updateProgress() {
@@ -141,14 +152,28 @@
       for (let word of vocabList) {
         counts[stats[word.cn] || 0]++;
       }
-      document.getElementById("count0").innerText = counts[0];
+
       document.getElementById("count1").innerText = counts[1];
       document.getElementById("count2").innerText = counts[2];
       document.getElementById("count3").innerText = counts[3];
+      document.getElementById("countReview").innerText = counts[0];
 
       const total = counts.reduce((a, b) => a + b, 0);
       const weighted = (counts[1] + 2 * counts[2] + 3 * counts[3]) / (3 * total || 1);
-      document.getElementById("barFill").style.width = (weighted * 100) + "%";
+      const barFill = document.getElementById("barFill");
+
+      barFill.style.width = (weighted * 100) + "%";
+      barFill.classList.remove("count1", "count2", "count3", "count-review");
+
+      if (counts[3] > 0) {
+        barFill.classList.add("count3");
+      } else if (counts[2] > 0) {
+        barFill.classList.add("count2");
+      } else if (counts[1] > 0) {
+        barFill.classList.add("count1");
+      } else if (counts[0] > 0) {
+        barFill.classList.add("count-review");
+      }
     }
 
     function handleEnterKey(event) {
