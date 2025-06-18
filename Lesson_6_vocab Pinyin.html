@@ -110,14 +110,28 @@
       {cn: "有的", pinyin: ["yǒude"], file: "有的.mp3"}
     ];
 
+    let quizList = [];
     let currentIndex = 0;
-    let roundCount = 0;
     const stats = {};
     let waitingForNext = false;
+    let roundCount = 0;
+
+    function shuffle(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    function resetQuizList() {
+      quizList = vocabList.slice();
+      shuffle(quizList);
+      currentIndex = 0;
+    }
 
     function playAudio() {
       const audio = document.getElementById("audioPlayer");
-      audio.src = vocabList[currentIndex].file;
+      audio.src = quizList[currentIndex].file;
       audio.play();
       document.getElementById("feedback").innerHTML = '';
       document.getElementById("pinyinInput").value = '';
@@ -125,7 +139,7 @@
 
     function checkPinyin() {
       const input = document.getElementById("pinyinInput").value.trim().toLowerCase();
-      const current = vocabList[currentIndex];
+      const current = quizList[currentIndex];
       const key = current.cn;
       const pinyinList = current.pinyin;
       if (!stats[key]) stats[key] = 0;
@@ -134,28 +148,27 @@
         stats[key] = Math.min(3, stats[key] + 1);
         document.getElementById("feedback").innerHTML = '<span style="color:green;">正解です！（Enterで次へ）</span>';
       } else {
-        stats[key] = 0;
         document.getElementById("feedback").innerHTML = '<span style="color:red;">違います。正しくは: ' + pinyinList.join(' / ') + '</span>';
       }
 
       updateProgress();
 
       currentIndex++;
-      if (currentIndex >= vocabList.length) {
+      if (currentIndex >= quizList.length) {
         roundCount++;
-        currentIndex = 0;
-
         if (roundCount >= 3) {
           document.getElementById("completionMessage").innerHTML =
             '<strong>🎉 3周正解しました！練習完了です！</strong>';
         }
+        resetQuizList();
       }
     }
 
     function updateProgress() {
       const counts = [0, 0, 0, 0];
       for (let word of vocabList) {
-        counts[stats[word.cn] || 0]++;
+        const count = stats[word.cn] || 0;
+        counts[count]++;
       }
 
       document.getElementById("count1").innerText = counts[1];
@@ -194,8 +207,8 @@
     }
 
     window.onload = function() {
+      resetQuizList();
       playAudio();
-      waitingForNext = false;
     };
   </script>
 </body>
