@@ -80,7 +80,8 @@
     <button onclick="checkPinyin()">答え合わせ</button>
     <div id="feedback"></div>
     <div class="progress-bar">
-      正解数 <span style="color:#32cd32;">▇</span> 3回:<span id="count3">0</span>　
+      正解数 
+      <span style="color:#32cd32;">▇</span> 3回:<span id="count3">0</span>　
       <span style="color:#64ee64;">▇</span> 2回:<span id="count2">0</span>　
       <span style="color:#a0ffa0;">▇</span> 1回:<span id="count1">0</span>　
       <span style="color:#ffffff;">▇</span> 0回:<span id="count0">0</span>
@@ -101,11 +102,12 @@
       {cn: "多少", pinyin: ["duōshao"], file: "多少.mp3"},
       {cn: "大约", pinyin: ["dàyuē"], file: "大约.mp3"},
       {cn: "小宝宝", pinyin: ["xiǎobǎobao"], file: "小宝宝.mp3"},
-      {cn: "有的", pinyin: ["yǒude"], file: "有的.mp3"},
+      {cn: "有的", pinyin: ["yǒude"], file: "有的.mp3"}
     ];
 
     let currentIndex = 0;
     const stats = {};
+    let waitingForNext = false;
 
     function playAudio() {
       const audio = document.getElementById("audioPlayer");
@@ -145,11 +147,10 @@
       document.getElementById("count3").innerText = counts[3];
 
       const total = counts.reduce((a, b) => a + b, 0);
-      const weighted = (counts[1] + 2 * counts[2] + 3 * counts[3]) / (3 * total);
+      const weighted = (counts[1] + 2 * counts[2] + 3 * counts[3]) / (3 * total || 1);
       document.getElementById("barFill").style.width = (weighted * 100) + "%";
     }
-  
-    let waitingForNext = false;
+
     function handleEnterKey(event) {
       if (event.key === 'Enter') {
         if (waitingForNext) {
@@ -161,12 +162,11 @@
         }
       }
     }
-    
+
     window.onload = function() {
       playAudio();
       waitingForNext = false;
     };
-
-</script>
+  </script>
 </body>
 </html>
